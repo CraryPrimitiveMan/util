@@ -21,8 +21,20 @@ static int le_util;
  */
 const zend_function_entry util_functions[] = {
 	PHP_FE(confirm_util_compiled,	NULL)		/* For testing, remove later. */
-	PHP_FE(self_concat,	NULL)
 	PHP_FE_END	/* Must be the last line in util_functions[] */
+};
+/* }}} */
+
+zend_class_entry *util_ce;
+
+/* {{{ util_method[]
+ *
+ * Every user visible function must have an entry in util_functions[].
+ */
+static zend_function_entry util_method[] = {
+	ZEND_ME(util,	array_first,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_last,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	{ NULL, NULL, NULL }
 };
 /* }}} */
 
@@ -54,8 +66,8 @@ ZEND_GET_MODULE(util)
  */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("util.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_util_globals, util_globals)
-    STD_PHP_INI_ENTRY("util.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_util_globals, util_globals)
+	STD_PHP_INI_ENTRY("util.global_value",	  "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_util_globals, util_globals)
+	STD_PHP_INI_ENTRY("util.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_util_globals, util_globals)
 PHP_INI_END()
 */
 /* }}} */
@@ -78,6 +90,11 @@ PHP_MINIT_FUNCTION(util)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+	zend_class_entry ce;
+
+	//Class name is "Util"
+	INIT_CLASS_ENTRY(ce, "Util", util_method);
+	util_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -149,6 +166,41 @@ PHP_FUNCTION(confirm_util_compiled)
 /* }}} */
 
 
+ZEND_METHOD(util, array_first)
+{
+	zval *arr, **zvalue;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+		RETURN_NULL();
+	}
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		RETURN_NULL();
+	}
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(arr));
+	if (zend_hash_get_current_data(Z_ARRVAL_P(arr), (void**)&zvalue) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	*return_value = **zvalue;
+	return;
+}
+
+ZEND_METHOD(util, array_last)
+{
+	zval *arr, **zvalue;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+		RETURN_NULL();
+	}
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		RETURN_NULL();
+	}
+	zend_hash_internal_pointer_end(Z_ARRVAL_P(arr));
+	if (zend_hash_get_current_data(Z_ARRVAL_P(arr), (void**)&zvalue) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	*return_value = **zvalue;
+	return;
+}
 
 /*
  * Local variables:
