@@ -18,6 +18,3 @@ if (extension_loaded($module)) {
     $str = "Module $module is not compiled into PHP";
 }
 echo "$str\n";
-$arr = [1, 2 , 3];
-echo 'Util::array_first($arr) === reset($arr) : ', Util::array_first($arr) === reset($arr), "\n";
-echo 'Util::array_last($arr) === end($arr) : ', Util::array_last($arr) === end($arr), "\n";
