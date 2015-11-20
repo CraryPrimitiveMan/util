@@ -34,6 +34,8 @@ zend_class_entry *util_ce;
 static zend_function_entry util_method[] = {
 	ZEND_ME(util,	array_first,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_last,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_first_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_last_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -200,6 +202,54 @@ ZEND_METHOD(util, array_last)
 
 	*return_value = **zvalue;
 	return;
+}
+
+ZEND_METHOD(util, array_first_key)
+{
+	char *key;
+	uint keylen;
+	ulong idx;
+	zval *arr;
+	int type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+		RETURN_NULL();
+	}
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		RETURN_NULL();
+	}
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(arr));
+	type = zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &key, &keylen, &idx, 0, NULL);
+	if (type == HASH_KEY_IS_STRING) {
+		RETURN_STRINGL(key, keylen, 0);
+	} else if (type == HASH_KEY_IS_LONG) {
+		RETURN_LONG(idx);
+	}
+	RETURN_NULL();
+}
+
+ZEND_METHOD(util, array_last_key)
+{
+	char *key;
+	uint keylen;
+	ulong idx;
+	zval *arr;
+	int type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+		RETURN_NULL();
+	}
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		RETURN_NULL();
+	}
+	zend_hash_internal_pointer_end(Z_ARRVAL_P(arr));
+	type = zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &key, &keylen, &idx, 0, NULL);
+	if (type == HASH_KEY_IS_STRING) {
+		RETURN_STRINGL(key, keylen, 0);
+	} else if (type == HASH_KEY_IS_LONG) {
+		RETURN_LONG(idx);
+	}
+	RETURN_NULL();
 }
 
 /*

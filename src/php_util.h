@@ -28,6 +28,8 @@ PHP_MINFO_FUNCTION(util);
 PHP_FUNCTION(confirm_util_compiled);	/* For testing, remove later. */
 ZEND_METHOD(util, array_first);
 ZEND_METHOD(util, array_last);
+ZEND_METHOD(util, array_first_key);
+ZEND_METHOD(util, array_last_key);
 
 /*
   	Declare any global variables you may need between the BEGIN
