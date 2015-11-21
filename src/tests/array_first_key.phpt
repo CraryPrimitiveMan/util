@@ -1,7 +1,9 @@
 --TEST--
 Check for util array_first_key
 --SKIPIF--
-<?php if (!extension_loaded("util")) print "skip"; ?>
+<?php if (!extension_loaded("util")) {
+    print "skip";
+} ?>
 --FILE--
 <?php
 $arr = ['php', 'C++', 'c', 'java'];

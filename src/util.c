@@ -167,7 +167,8 @@ PHP_FUNCTION(confirm_util_compiled)
 }
 /* }}} */
 
-
+/* {{{ proto Util::array_first(array $arr)
+   Return the first value from an array. */
 ZEND_METHOD(util, array_first)
 {
 	zval *arr, **zvalue;
@@ -185,7 +186,10 @@ ZEND_METHOD(util, array_first)
 	*return_value = **zvalue;
 	return;
 }
+/* }}} */
 
+/* {{{ proto Util::array_last(array $arr)
+   Return the last value from an array. */
 ZEND_METHOD(util, array_last)
 {
 	zval *arr, **zvalue;
@@ -203,7 +207,10 @@ ZEND_METHOD(util, array_last)
 	*return_value = **zvalue;
 	return;
 }
+/* }}} */
 
+/* {{{ proto Util::array_first_key(array $array)
+   Return the first key from an array. */
 ZEND_METHOD(util, array_first_key)
 {
 	char *key;
@@ -227,7 +234,10 @@ ZEND_METHOD(util, array_first_key)
 	}
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto Util::array_last_key(array $array)
+   Return the last key from an array. */
 ZEND_METHOD(util, array_last_key)
 {
 	char *key;
