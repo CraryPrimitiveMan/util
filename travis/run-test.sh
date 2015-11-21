@@ -1,5 +1,8 @@
 #!/bin/bash
-TEST_DIR="`pwd`/tests/"
+SRC_DIR="`pwd`/src"
+TEST_DIR="$SRC_DIR/tests/"
+
+cd $SRC_DIR
 
 make test
 
