@@ -9,9 +9,8 @@ Check for util array_first
 $arr = ['php', 'C++', 'c', 'java'];
 echo Util::array_first($arr), "\n";
 
-$arr = ['b' => 'banana', 'a' => 'pear'];
-echo Util::array_first($arr), "\n";
+// $arr = ['b' => 'apple', 'a' => 'pear'];
+// echo Util::array_first($arr), "\n";
 ?>
 --EXPECT--
 php
-banana
