@@ -30,6 +30,7 @@ ZEND_METHOD(util, array_first);
 ZEND_METHOD(util, array_last);
 ZEND_METHOD(util, array_first_key);
 ZEND_METHOD(util, array_last_key);
+ZEND_METHOD(util, array_flatten);
 
 /*
   	Declare any global variables you may need between the BEGIN

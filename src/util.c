@@ -36,6 +36,7 @@ static zend_function_entry util_method[] = {
 	ZEND_ME(util,	array_last,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_first_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_last_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_flatten,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -261,6 +262,61 @@ ZEND_METHOD(util, array_last_key)
 	}
 	RETURN_NULL();
 }
+/* }}} */
+
+void util_array_flatten(zval* arr, zval* result, zend_bool preserve_keys) {
+	zval **zvalue;
+	char *key;
+	uint keylen;
+	ulong idx;
+	int type;
+	HashTable* arr_hash;
+	HashPosition pointer;
+
+	// Copy a temp array
+	zval temp;
+	temp = *arr;
+	zval_copy_ctor(&temp);
+
+	arr_hash = Z_ARRVAL_P(&temp);
+	zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+	while (zend_hash_get_current_data_ex(arr_hash, (void**) &zvalue, &pointer) == SUCCESS) {
+		if (Z_TYPE_P(*zvalue) == IS_ARRAY) {
+			util_array_flatten(*zvalue, result, preserve_keys);
+		} else {
+			type = zend_hash_get_current_key_ex(arr_hash, &key, &keylen, &idx, 0, &pointer);
+			if (preserve_keys && type != HASH_KEY_IS_LONG) {
+				add_assoc_zval(result, key, *zvalue);
+			} else {
+				add_next_index_zval(result, *zvalue);
+			}
+		}
+		zend_hash_move_forward_ex(arr_hash, &pointer);
+		//ALLOC_INIT_ZVAL(*zvalue);
+	}
+}
+
+/* {{{ proto Util::array_flatten(array $array[, bool $preserve_keys = TRUE])
+   Flattens a multi-dimensional array into a one dimensional array. */
+ZEND_METHOD(util, array_flatten)
+{
+	zval *arr, *result;
+	zend_bool preserve_keys = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &arr, &preserve_keys) == FAILURE) {
+		RETURN_NULL();
+	}
+	if (Z_TYPE_P(arr) != IS_ARRAY) {
+		RETURN_NULL();
+	}
+
+	// Init return value as array
+	array_init(return_value);
+
+	util_array_flatten(arr, return_value, preserve_keys);
+	return;
+}
+/* }}} */
 
 /*
  * Local variables:
