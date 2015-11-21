@@ -1,6 +1,6 @@
 # Util
 [![Build Status](https://travis-ci.org/CraryPrimitiveMan/util.png?branch=master)](https://travis-ci.org/CraryPrimitiveMan/util)
-[![License](https://img.shields.io/packagist/l/CraryPrimitiveMan/util.svg)](https://github.com/CraryPrimitiveMan/util/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/CraryPrimitiveMan/util.svg)](https://github.com/CraryPrimitiveMan/util/blob/master/LICENSE)
 
 A php util extension based on [utilphp](https://github.com/brandonwamboldt/utilphp)
 
