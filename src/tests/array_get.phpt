@@ -8,8 +8,10 @@ Check for util array_get
 <?php
 $arr = ['name' => 'harry'];
 echo Util::array_get($arr, 'action', 'index'), "\n";
+echo Util::array_get($arr, 'action'), "\n";
 echo Util::array_get($arr, 'name', 'tom'), "\n";
 ?>
 --EXPECT--
 index
+
 harry

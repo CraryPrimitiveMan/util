@@ -325,15 +325,17 @@ ZEND_METHOD(util, array_flatten)
    Return a value from an array, or return a given default if the index isn't set. */
 ZEND_METHOD(util, array_get)
 {
-	zval *arr, *default_value, **zvalue;
+	zval *arr, **zvalue, *default_value;
 	char *key;
-	uint key_len;
+	uint keylen;
+	MAKE_STD_ZVAL(default_value);
+	ZVAL_NULL(default_value);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|z", &arr, &key, &key_len, &default_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|z", &arr, &key, &keylen, &default_value) == FAILURE) {
 		RETURN_NULL();
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arr), key, key_len, (void**) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_P(arr), key, keylen, (void**) &zvalue) == SUCCESS) {
 		*return_value = **zvalue;
 	} else {
 		*return_value = *default_value;
