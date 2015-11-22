@@ -1,5 +1,5 @@
 --TEST--
-Check for util array_first
+Check for util array_get
 --SKIPIF--
 <?php if (!extension_loaded("util")) {
     print "skip";

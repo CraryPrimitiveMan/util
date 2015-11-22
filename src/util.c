@@ -186,6 +186,7 @@ ZEND_METHOD(util, array_first)
 	}
 
 	*return_value = **zvalue;
+	zval_copy_ctor(return_value);
 	return;
 }
 /* }}} */
@@ -207,6 +208,7 @@ ZEND_METHOD(util, array_last)
 	}
 
 	*return_value = **zvalue;
+	zval_copy_ctor(return_value);
 	return;
 }
 /* }}} */
@@ -336,6 +338,7 @@ ZEND_METHOD(util, array_get)
 	} else {
 		*return_value = *default_value;
 	}
+	zval_copy_ctor(return_value);
 	return;
 }
 /* }}} */
