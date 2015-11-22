@@ -335,7 +335,7 @@ ZEND_METHOD(util, array_get)
 		RETURN_NULL();
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(arr), key, keylen, (void**) &zvalue) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_P(arr), key, keylen + 1, (void**) &zvalue) == SUCCESS) {
 		*return_value = **zvalue;
 	} else {
 		*return_value = *default_value;
