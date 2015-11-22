@@ -19,7 +19,15 @@ if [ ${#FAILS[@]} -gt 0 ]
 then
 	for fail in "${FAILS[@]}"
 	do
+		echo -e "\n\ndiff file:"
 		sh -xc "cat $fail"
+		name=$(ls $fail | cut -d. -f1)
+		echo -e "\n\nexp file:"
+		sh -xc "cat $name.exp"
+		echo -e "\n\nout file:"
+		sh -xc "cat $name.out"
+		echo -e "\n\nphp file:"
+		sh -xc "cat $name.php"
 	done
 	exit 1
 else
