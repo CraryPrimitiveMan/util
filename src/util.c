@@ -325,7 +325,7 @@ ZEND_METHOD(util, array_get)
 {
 	zval *arr, *default_value, **zvalue;
 	char *key;
-	int key_len;
+	uint key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|z", &arr, &key, &key_len, &default_value) == FAILURE) {
 		RETURN_NULL();
