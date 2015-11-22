@@ -32,11 +32,12 @@ zend_class_entry *util_ce;
  * Every user visible function must have an entry in util_functions[].
  */
 static zend_function_entry util_method[] = {
-	ZEND_ME(util,	array_first,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(util,	array_last,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(util,	array_first_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(util,	array_last_key,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(util,	array_flatten,  NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_first,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_last, 		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_first_key,	NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_last_key,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_flatten,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_get,			NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -173,7 +174,7 @@ PHP_FUNCTION(confirm_util_compiled)
 ZEND_METHOD(util, array_first)
 {
 	zval *arr, **zvalue;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &arr) == FAILURE) {
 		RETURN_NULL();
 	}
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -194,7 +195,7 @@ ZEND_METHOD(util, array_first)
 ZEND_METHOD(util, array_last)
 {
 	zval *arr, **zvalue;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &arr) == FAILURE) {
 		RETURN_NULL();
 	}
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -220,7 +221,7 @@ ZEND_METHOD(util, array_first_key)
 	zval *arr;
 	int type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &arr) == FAILURE) {
 		RETURN_NULL();
 	}
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -247,7 +248,7 @@ ZEND_METHOD(util, array_last_key)
 	zval *arr;
 	int type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &arr) == FAILURE) {
 		RETURN_NULL();
 	}
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -303,7 +304,7 @@ ZEND_METHOD(util, array_flatten)
 	zval *arr, *result;
 	zend_bool preserve_keys = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &arr, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &arr, &preserve_keys) == FAILURE) {
 		RETURN_NULL();
 	}
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
@@ -314,6 +315,27 @@ ZEND_METHOD(util, array_flatten)
 	array_init(return_value);
 
 	util_array_flatten(arr, return_value, preserve_keys);
+	return;
+}
+/* }}} */
+
+/* {{{ proto Util::array_get($array, $key[, mixed $default = NULL])
+   Return a value from an array, or return a given default if the index isn't set. */
+ZEND_METHOD(util, array_get)
+{
+	zval *arr, *default_value, **zvalue;
+	char *key;
+	int key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|z", &arr, &key, &key_len, &default_value) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(arr), key, key_len, (void**) &zvalue) == SUCCESS) {
+		*return_value = **zvalue;
+	} else {
+		*return_value = *default_value;
+	}
 	return;
 }
 /* }}} */
