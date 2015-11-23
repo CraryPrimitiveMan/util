@@ -39,6 +39,7 @@ static zend_function_entry util_method[] = {
 	ZEND_ME(util,	array_flatten,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_get,			NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_pluck,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_map_deep,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -414,6 +415,73 @@ ZEND_METHOD(util, array_pluck)
 		}
 		zend_hash_move_forward_ex(arr_hash, &pointer);
 	}
+	return;
+}
+/* }}} */
+
+zval * util_array_map_deep(zval* arr, zend_fcall_info* fci, zend_fcall_info_cache* fci_cache, zend_bool on_nonscalar) {
+	zval *result, **zvalue;
+	char *key;
+	uint keylen;
+	ulong idx;
+	int type, value_type;
+	HashTable* arr_hash;
+	HashPosition pointer;
+	zval **args[1];
+	zval **arr_value;
+	MAKE_STD_ZVAL(result);
+	array_init(result);
+
+	// Copy a temp array
+	zval temp;
+	temp = *arr;
+	zval_copy_ctor(&temp);
+
+	arr_hash = Z_ARRVAL_P(&temp);
+	zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+	while (zend_hash_get_current_data_ex(arr_hash, (void**) &zvalue, &pointer) == SUCCESS) {
+		type = zend_hash_get_current_key_ex(arr_hash, &key, &keylen, &idx, 0, &pointer);
+		value_type = Z_TYPE_P(*zvalue);
+		if (value_type == IS_ARRAY) {
+			if (type == HASH_KEY_IS_LONG) {
+				add_index_zval(result, idx, util_array_map_deep(*zvalue, fci, fci_cache, on_nonscalar));
+			} else {
+				add_assoc_zval(result, key, util_array_map_deep(*zvalue, fci, fci_cache, on_nonscalar));
+			}
+		} else if (value_type == IS_BOOL || value_type == IS_LONG || value_type == IS_DOUBLE || value_type == IS_STRING || on_nonscalar) {
+			zval *retval_ptr = NULL;
+			args[0] = zvalue;
+			(*fci).retval_ptr_ptr = &retval_ptr;
+			(*fci).params = args;
+			if (zend_call_function(fci, fci_cache TSRMLS_CC) == SUCCESS && retval_ptr) {
+				if (type == HASH_KEY_IS_LONG) {
+					add_index_zval(result, idx, retval_ptr);
+				} else {
+					add_assoc_zval(result, key, retval_ptr);
+				}
+			}
+		}
+		zend_hash_move_forward_ex(arr_hash, &pointer);
+	}
+	return result;
+}
+
+/* {{{ proto Util::array_map_deep(array $array, callable $callback[, bool $on_nonscalar = FALSE])
+   Returns an array containing all the elements of $array after applying the callback function to each one recursively. Particularly useful for avoiding errors when calling functions that only accept scalar values on an array that could contain nested arrays, such as $_GET or $_POST. */
+ZEND_METHOD(util, array_map_deep)
+{
+	zval *arr;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zend_bool on_nonscalar = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "af|b", &arr, &fci, &fci_cache, &on_nonscalar) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	fci.param_count = 1;
+	fci.no_separation = 0;
+	*return_value = *util_array_map_deep(arr, &fci, &fci_cache, on_nonscalar);
 	return;
 }
 /* }}} */
