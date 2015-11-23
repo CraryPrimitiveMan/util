@@ -1,3 +1,4 @@
+make clean
 phpize
 ./configure
 make

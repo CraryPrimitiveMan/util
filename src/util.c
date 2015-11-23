@@ -38,6 +38,7 @@ static zend_function_entry util_method[] = {
 	ZEND_ME(util,	array_last_key,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_flatten,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(util,	array_get,			NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(util,	array_pluck,		NULL,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -341,6 +342,77 @@ ZEND_METHOD(util, array_get)
 		*return_value = *default_value;
 	}
 	zval_copy_ctor(return_value);
+	return;
+}
+/* }}} */
+
+/* {{{ proto Util::array_pluck(array $array, string $field[, bool $preserve_keys, bool $remove_nomatches])
+   Replaces each value in an array with the specified field of the array or object that used to be the value. Very useful when you have an array of objects or arrays from a database, and you only want one specific field. For example, you want an array of emails from an array of users. */
+ZEND_METHOD(util, array_pluck)
+{
+	zval *arr;
+	char *key;
+	uint keylen;
+	zend_bool preserve_keys = 1;
+	zend_bool remove_nomatches = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|bb", &arr, &key, &keylen, &preserve_keys, &remove_nomatches) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	zval **item;
+	HashPosition pointer;
+	HashTable* arr_hash = Z_ARRVAL_P(arr);
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+	while (zend_hash_get_current_data_ex(arr_hash, (void**) &item, &pointer) == SUCCESS) {
+		zval *zvalue;
+		MAKE_STD_ZVAL(zvalue);
+		ZVAL_NULL(zvalue);
+		zval *temp;
+		MAKE_STD_ZVAL(temp);
+		*temp = **item;
+		zval_copy_ctor(temp);
+
+		if (Z_TYPE_P(temp) == IS_OBJECT) {
+			zend_class_entry *object;
+			object = Z_OBJCE_P(temp);
+			zval *temp_data;
+			temp_data = zend_read_property(object, temp, key, keylen, 1 TSRMLS_DC);
+			*zvalue = *temp_data;
+		} else {
+			zval **temp_data;
+			if (zend_hash_find(Z_ARRVAL_P(temp), key, keylen + 1, (void**) &temp_data) == SUCCESS) {
+				*zvalue = **temp_data;
+			}
+		}
+
+		char *type_key;
+		uint type_keylen;
+		ulong idx;
+
+		if (Z_TYPE_P(zvalue) != IS_NULL) {
+			if (preserve_keys) {
+				int type = zend_hash_get_current_key_ex(arr_hash, &type_key, &type_keylen, &idx, 0, &pointer);
+				if (type == HASH_KEY_IS_LONG) {
+					add_index_zval(return_value, idx, zvalue);
+				} else {
+					add_assoc_zval(return_value, type_key, zvalue);
+				}
+			} else {
+				add_next_index_zval(return_value, zvalue);
+			}
+		} else if (!remove_nomatches) {
+			int type = zend_hash_get_current_key_ex(arr_hash, &type_key, &type_keylen, &idx, 0, &pointer);
+			if (type == HASH_KEY_IS_LONG) {
+				add_index_zval(return_value, idx, temp);
+			} else {
+				add_assoc_zval(return_value, type_key, temp);
+			}
+		}
+		zend_hash_move_forward_ex(arr_hash, &pointer);
+	}
 	return;
 }
 /* }}} */
