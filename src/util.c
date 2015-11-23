@@ -355,6 +355,7 @@ ZEND_METHOD(util, array_pluck)
 	uint keylen;
 	zend_bool preserve_keys = 1;
 	zend_bool remove_nomatches = 1;
+	zend_bool silent = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as|bb", &arr, &key, &keylen, &preserve_keys, &remove_nomatches) == FAILURE) {
 		RETURN_NULL();
@@ -379,7 +380,7 @@ ZEND_METHOD(util, array_pluck)
 			zend_class_entry *object;
 			object = Z_OBJCE_P(temp);
 			zval *temp_data;
-			temp_data = zend_read_property(object, temp, key, keylen, 1 TSRMLS_DC);
+			temp_data = zend_read_property(object, temp, key, keylen, silent TSRMLS_CC);
 			*zvalue = *temp_data;
 		} else {
 			zval **temp_data;
