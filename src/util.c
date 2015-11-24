@@ -453,7 +453,7 @@ zval * util_array_map_deep(zval* arr, zend_fcall_info* fci, zend_fcall_info_cach
 			args[0] = zvalue;
 			(*fci).retval_ptr_ptr = &retval_ptr;
 			(*fci).params = args;
-			if (zend_call_function(fci, fci_cache TSRMLS_CC) == SUCCESS && retval_ptr) {
+			if (zend_call_function(fci, fci_cache) == SUCCESS && retval_ptr) {
 				if (type == HASH_KEY_IS_LONG) {
 					add_index_zval(result, idx, retval_ptr);
 				} else {
