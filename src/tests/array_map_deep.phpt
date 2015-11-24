@@ -18,17 +18,26 @@ class Man
     {
         return $this->name . ' ' . $age;
     }
+
+    public function __toString()
+    {
+        return 'man, name is ' . $this->name;
+    }
 }
 
-$arr = ['a' => 10, 'b' => ['c' => 18, 'd' => 25, 30], 45];
+$obj = new Man('harry');
+$arr = ['a' => 10, 'b' => ['c' => 18, 'd' => 25, 30], 45, 'obj' => $obj];
 
 $test1 = Util::array_map_deep($arr, function ($value) {
     return 'cool ' . $value;
 });
-$obj = new Man('harry');
 $test2 = Util::array_map_deep($arr, [$obj, 'age']);
+$test3 = Util::array_map_deep($arr, function ($value) {
+    return 'cool ' . $value;
+}, true);
 var_dump($test1);
 var_dump($test2);
+var_dump($test3);
 ?>
 --EXPECT--
 array(3) {
@@ -60,4 +69,21 @@ array(3) {
   }
   [0]=>
   string(8) "harry 45"
+}
+array(4) {
+  ["a"]=>
+  string(7) "cool 10"
+  ["b"]=>
+  array(3) {
+    ["c"]=>
+    string(7) "cool 18"
+    ["d"]=>
+    string(7) "cool 25"
+    [0]=>
+    string(7) "cool 30"
+  }
+  [0]=>
+  string(7) "cool 45"
+  ["obj"]=>
+  string(23) "cool man, name is harry"
 }
